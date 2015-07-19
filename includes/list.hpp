@@ -102,7 +102,7 @@ struct foldl_f {
   template <typename fn, typename acc, typename list>
   struct apply : foldl_f::template apply<
     fn,
-    typename fn::template apply<acc, typename car<list>::type>::type,
+    typename fn::template apply<typename car<list>::type, acc>::type,
     typename cdr<list>::type
   > {};
 
