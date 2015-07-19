@@ -76,6 +76,9 @@ struct map_f {
     typename fn::template apply<typename car<list>::type>,
     map_f::template apply<fn, cdr<list>>
   > {};
+
+  template <typename fn>
+  struct apply<fn, empty> : empty {};
 };
 
 template <typename fn, typename list>
