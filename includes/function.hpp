@@ -5,7 +5,7 @@ namespace meta { namespace function {
 
   struct apply_f {
     template <template <typename...> class F, typename ...args>
-    struct apply : F<args...> {};
+    struct apply : F<typename args::type...> {};
   };
 
   template <template <typename...> class F, typename ...args>

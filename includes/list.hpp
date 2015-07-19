@@ -10,20 +10,19 @@ using namespace meta::typewrappers;
 
 struct empty {
   using type = empty;
-  using value = empty;
 };
 
-template <typename car, typename cdr>
+template <typename h, typename t>
 struct cons {
-  using type = cons<car, cdr>;
-  using value = car;
-  using next = cdr;
+  using type = cons<h, t>;
+  using head = h;
+  using tail = t;
 };
 
 struct cdr_f {
   template <typename cons>
   struct apply {
-    using type = typename cons::type::next::type;
+    using type = typename cons::type::tail::type;
   };
 };
 
@@ -36,7 +35,7 @@ struct cddr : cdr_f::template apply<typename cdr<cons>::type> {};
 struct car_f {
   template <typename cons>
   struct apply {
-    using type = typename cons::type::value;
+    using type = typename cons::type::head::type;
   };
 };
 
@@ -75,12 +74,41 @@ struct map_f {
   template <typename fn, typename list>
   struct apply : cons<
     typename fn::template apply<typename car<list>::type>,
-    map_f::template apply<fn, typename cdr<list>::type>
+    map_f::template apply<fn, cdr<list>>
   > {};
 };
 
 template <typename fn, typename list>
 struct map : map_f::template apply<fn, list> {};
+
+struct foldr_f {
+  template <typename fn, typename base, typename list>
+  struct apply : fn::template apply<
+    typename car<list>::type,
+    typename foldr_f::template apply<fn, base, typename cdr<list>::type>::type
+  > {};
+
+  template <typename fn, typename base>
+  struct apply<fn, base, empty> : base {};
+};
+
+template <typename fn, typename base, typename list>
+struct foldr : foldr_f::template apply<fn, base, list> {};
+
+struct foldl_f {
+  template <typename fn, typename acc, typename list>
+  struct apply : foldl_f::template apply<
+    fn,
+    typename fn::template apply<acc, typename car<list>::type>::type,
+    typename cdr<list>::type
+  > {};
+
+  template <typename fn, typename acc>
+  struct apply<fn, acc, empty> : acc {};
+};
+
+template <typename fn, typename acc, typename list>
+struct foldl : foldl_f::template apply<fn, acc, list> {};
 
 }}
 
