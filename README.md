@@ -18,7 +18,7 @@ metaprograms.
 using namespace meta::typewrappers;
 
 int main() {
-  std::cout << plus<_uint<1>, _uint<1>>::value << std::endl; // == 2
+  std::cout << plus<uint_<1>, uint_<1>>::value << std::endl; // == 2
   return 0;
 }
 ```
