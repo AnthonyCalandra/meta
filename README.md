@@ -13,7 +13,7 @@ metaprograms.
 
 ```cpp
 #include <iostream>
-#include "meta.hpp"
+#include "meta.hh"
 
 using namespace meta::typewrappers;
 
@@ -74,6 +74,48 @@ list_c<int, 1, 2, 3> // == list<int_<1>, int_<2>, int_<3>>
 You can also operate on these lists, with a little help from `lambda`, incrementing each value in a list is easy:
 ```cpp
 map<lambda<incr_f>, list_c<int, 1, 2, 3>> // == list_c<int, 2, 3, 4>
+```
+
+## Reflection
+
+meta currently has limited support for reflection. Due to the way template metaprogramming works,
+it's not possible to do much without introducing many macros into the code, but with `std:;type_traits` this makes some things now possible. Like the library, this section is a work in progress.
+
+Here's an example of determining if a class has a `foo` member:
+```cpp
+META_DECLARE_CLASS_MEMBER(foo);
+class FooFieldClass {
+public:
+  int foo;
+};
+class FooMethodClass {
+public:
+  void foo() {}
+};
+class EmptyClass {};
+class_has_member_foo<EmptyClass>::type::value // == false
+class_has_member_foo<FooFieldClass>::type::value // == true
+class_has_member_foo<FooMethodClass>::type::value // == true
+```
+Unfortunately this isn't perfect since private and protected members return false. However, you can use `META_MAKE_FRIEND` to allow access to all members:
+```cpp
+META_DECLARE_CLASS_MEMBER(foo);
+class FooClass {
+  META_MAKE_FRIEND(FooClass, foo);
+  void foo() {}
+};
+class_has_member_foo<FooClass>::type::value // == true
+```
+
+With meta you can also get types of methods and fields:
+```cpp
+class FooClass {
+public:
+  int foo;
+  void bar() {}
+};
+META_GET_FIELD_TYPE(FooClass, foo); // == int
+META_GET_METHOD_TYPE(FooClass, bar); // == void
 ```
 
 # License

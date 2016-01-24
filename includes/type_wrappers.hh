@@ -5,6 +5,10 @@
 
 namespace meta { namespace typewrappers {
 
+  struct void_ {
+    using type = void;
+  };
+
   template <typename T, T N>
   struct type_ {
     using type = type_<T, N>;
