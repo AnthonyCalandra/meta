@@ -211,6 +211,22 @@ struct equal_f {
 template <typename list1, typename list2, typename pred = lambda<std::is_same>>
 struct equal : equal_f::template apply<list1, list2, pred> {};
 
+struct range_f {
+  template <int start, int end>
+  struct apply : std::conditional<
+    start >= end - 1,
+    empty,
+    typename std::conditional<
+      start == end,
+      cons<int_<end>, empty>,
+      typename cons<int_<start>, range_f::template apply<start + 1, end>>::type
+    >::type
+  > {};
+};
+
+template <int start, int end>
+struct range : range_f::template apply<start, end> {};
+
 }}
 
 #endif
